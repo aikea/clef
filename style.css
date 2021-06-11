@@ -1,0 +1,48 @@
+body {
+  margin: 0 auto;
+  text-align: center;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  /* background-color: blanchedalmond; */
+}
+
+header {
+  background-color: #20dbb3;
+  color: darkslategray;
+  border-radius: 5px;
+  border: 1px #20dbb3 solid;
+  margin: 1em;
+}
+
+header > p {
+  font-size: large;
+}
+
+canvas {
+  border: 1px black solid;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.container {
+  display: flex;
+  flex-direction: row;
+  padding: 1em;
+  font-size: 1.5em;
+}
+
+.score {
+  flex: 1;
+}
+
+.info-container {
+  flex: 1;
+}
+
+.info-container > span {
+  font-size: smaller;
+}
+
+.info {
+  background-color: #20dbb3;
+  border-radius: 5px;
+}
