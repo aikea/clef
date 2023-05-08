@@ -65,7 +65,7 @@ let clearCanvas = (context) => {
 	context.fillRect(0, 0, context.canvas.width, context.canvas.height);
 }
 
-let drawNote = (context, note) => {
+let drawNote = (note, color = 'black') => {
 	/*
 	@param context - the canvas context to draw on
 	@param note - the note object to draw
@@ -75,6 +75,7 @@ let drawNote = (context, note) => {
 	// note: this shape is drawn assuming translation makes the upper left corner origin
 	// this means it is NOT center based
 	context.beginPath();
+	context.fillStyle = color;
 	context.translate(note.x, note.y);	// do the translation
 	context.moveTo(0.5 * noteHeadWidth, 0);
 	context.quadraticCurveTo(noteHeadWidth, 0, noteHeadWidth, 0.5 * noteHeadHeight);
@@ -107,7 +108,7 @@ let drawGuitar = (context, note) => {
 let generateNoteCoordinates = (context, notes) => {
 	notes.map(note => {
 		note.x = context.canvas.width / 2;
-
+		
 		// k is a imagined baseline which makes the equation here somewhat prettier
 		// it is the y of the first staff line - the gap of the staff lines
 		// so, assuming drawing happens taking upper left corner of notehead as origin
@@ -120,53 +121,27 @@ let generateNoteCoordinates = (context, notes) => {
 	});
 }
 
-function main() {
-	let c = document.getElementById("canvas1").getContext('2d');
-	setSize(c.canvas, 400, 200);
-	// let c2 = document.getElementById("canvas2").getContext('2d');
-	// setSize(c2.canvas, 400, 200);
-	
-	// hyperparameters of the application
-	let w = c.canvas.width;
-	let h = c.canvas.height;
-	// set up event handling
-	// drawGuitar(c2);
-	
-	generateNoteCoordinates(c, notes);
-	
-	let staff = {
-		type: "Treble",
-		lineNum: 5,
-		lines: [],
-	}
-	run(c, staff);
-
-	document.addEventListener('keypress', (event) => {
-		updateScore(event.code);
-	})
-}
-
-let DELAY = 2000; 			// how long to wait
-let globalRandomNote = null;
-let parseInput = true;
-let score = 0;
-let iteration = 0;	// number of iterations
-
 let updateScore = (keyCode) => {
 	if (parseInput) {
 		if ("Key" + globalRandomNote.name === keyCode) {
 			score++;
-			document.getElementById("info").style.color = "green";
-			document.getElementById("info").innerHTML = "Correct!";
+			// document.getElementById("info").style.color = "green";
+			// document.getElementById("info").innerHTML = "Correct!";
 			parseInput = false;
-
+			drawNote(globalRandomNote,  CORRECT_NOTE_COLOR);
+			document.getElementById("canvas-bg").style.backgroundColor = CORRECT_NOTE_COLOR;
+			
 		} else {
-			document.getElementById("info").style.color = "red";
-			document.getElementById("info").innerHTML = "Wrong!";
+			// document.getElementById("info").style.color = "red";
+			// document.getElementById("info").innerHTML = "Wrong!";
+			drawNote(globalRandomNote, INCORRECT_NOTE_COLOR);
+			document.getElementById("canvas-bg").style.backgroundColor = INCORRECT_NOTE_COLOR;
 		}
 	} else {
-		document.getElementById("info").style.color = "blue";
-		document.getElementById("info").innerHTML = "Already Counted!";
+		// document.getElementById("info").style.color = "blue";
+		// document.getElementById("info").innerHTML = "Already Counted!";
+		drawNote(globalRandomNote, PARSED_NOTE_COLOR);
+		document.getElementById("canvas-bg").style.backgroundColor = PARSED_NOTE_COLOR;
 	}
 	document.getElementById("score").innerHTML = `Score: ${score}/${iteration}`;
 }
@@ -194,13 +169,13 @@ let updateDelayTime = () => {
 let run = (c, staff, timeout = null) => {
 	clearCanvas(c);
 	// clear previous timeout
-	if (timeout) { clearTimeout(timeout); }
+	if (timeout ) { clearTimeout(timeout); }
 	parseInput = true;
 	iteration++;
 	let randomNote = notes[Math.floor(Math.random() * notes.length)];
 	globalRandomNote = randomNote;
 	drawStaff(c, staff);
-	drawNote(c, randomNote);
+	drawNote(randomNote);
 	// gradually decrease delay time
 	updateDelayTime();
 	timeout = setTimeout(() => {
@@ -208,6 +183,50 @@ let run = (c, staff, timeout = null) => {
 		run(c, staff, timeout);
 	}, DELAY);
 	document.getElementById("score").innerHTML = `Score: ${score}/${iteration}`;
+}
+// 
+// Global App State Variables
+// 
+// 
+let context = document.getElementById("canvas1").getContext('2d');
+let w = context.canvas.width;
+let h = context.canvas.height;
+let DELAY = 2000; 			// how long to wait
+let globalRandomNote = null;
+let parseInput = true;
+let score = 0;
+let iteration = 0;	// number of iterations
+
+// colors 
+let CORRECT_NOTE_COLOR = '#198754';
+let INCORRECT_NOTE_COLOR = '#dc3545';
+let PARSED_NOTE_COLOR = '#6f42c1';
+
+function main() {
+	setSize(context.canvas, 400, 200);
+	// let c2 = document.getElementById("canvas2").getContext('2d');
+	// setSize(c2.canvas, 400, 200);
+	
+	// hyperparameters of the application
+	// set up event handling
+	// drawGuitar(c2);
+	
+	generateNoteCoordinates(context, notes);
+	
+	let staff = {
+		type: "Treble",
+		lineNum: 5,
+		lines: [],
+	}
+	run(context, staff);
+	
+	document.addEventListener('keypress', (event) => {
+		updateScore(event.code);
+	});
+
+	// document.addEventListener('keyup', (event) => {
+	// 	document.getElementById("canvas-bg").style.backgroundColor = 'white';
+	// });
 }
 
 main();
